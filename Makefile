@@ -18,7 +18,7 @@ CONF_FILE = opa.conf
 
 #Compiler variables
 OPACOMPILER ?= opa
-FLAG = --opx-dir _build --import-package stdlib.database.mongo
+FLAG = --opx-dir _build
 PORT = 8080
 
 RUN_OPT =
