@@ -1,6 +1,6 @@
 type config =
     { string title
-    , string repo_path
+    , repo repo
     , string front_page
     , string page_extension
     }
