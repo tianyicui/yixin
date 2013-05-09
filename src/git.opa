@@ -52,8 +52,10 @@ private module Blob {
 
 module Git {
 
-    function read_file(repo repo, list(string) path) {
-        error("not implemented")
+    function string read_file(repo repo, list(string) path) {
+        /* mocked */
+        path = String.concat("/", [repo.path | path])
+        File.read(path) |> string_of_binary
     }
 
     function write_file(repo repo, list(string) path, string commit_msg) {

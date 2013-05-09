@@ -17,11 +17,13 @@ type metadata = void
 module Model {
 
     function read_page(config, path, title) {
-        error("not implemented")
+        path = path ++ [title + config.page_extension]
+        Git.read_file(config.repo, path)
     }
 
     function write_page(config, path, title, commit_msg) {
-        error("not implemented")
+        path = path ++ [title + config.page_extension]
+        Git.write_file(config.repo, path, commit_msg)
     }
 
 }
