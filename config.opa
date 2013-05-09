@@ -9,6 +9,7 @@ module Config {
         , repo : { path: (env("HOME") |> Option.get) + "/mindrepo" }
         , front_page: "Front Page"
         , page_extension: ".page"
+        , default_metadata: void
         }
 
 }
