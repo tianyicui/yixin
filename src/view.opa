@@ -17,12 +17,9 @@ module View {
     Resource.page(title, html)
   }
 
-  function default_page() {
-    content =
-      <div class="hero-unit">
-        Page content goes here...
-      </div>
-    page_template("Default page", content)
+  function display(config, path, title) {
+    content = Model.read_page(config, path, title) |> Markup.render
+    page_template(title, content)
   }
 
 }

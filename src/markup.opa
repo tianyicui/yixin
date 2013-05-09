@@ -9,7 +9,7 @@ private module Pandoc {
         ]
         |> String.concat(" ", _)
         |> System.exec(_, markdown)
-        |> Xhtml.of_string
+        |> Xhtml.of_string_unsafe
     }
 
 }
