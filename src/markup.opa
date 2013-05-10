@@ -1,3 +1,7 @@
+/* FIXME: these two imports are temporary hack */
+import yixin.model
+import yixin.config
+
 private type json = RPC.Json.json0(json)
 private type link = {json body, string href, string alt}
 
@@ -26,18 +30,29 @@ module Markup {
         |> Xhtml.of_string_unsafe
     }
 
-    private function option(link) destruct_link(json json) {
+    private function option((link, string)) destruct_link(json json) {
         match(json) {
         case { Record:
                [ ("Link",
                  { List:
-                   [ body,
+                   [ ({ List: body_list } as body),
                      { List: [
                          { String: href },
                          { String: alt }
                      ]}]})]
              }:
-            Option.some(~{body, href, alt})
+            /* FIXME: when the wiki link contains two or more consecutive spaces, we have no way to know */
+            text = List.map(
+                function(x){
+                    match(x) {
+                    case {Record: [("Str", {String: str})]}: str
+                    case {String: "Space"}: " "
+                    default: "" /* FIXME: log error */
+                    }
+                },
+                body_list
+            ) |> String.concat("", _)
+            Option.some((~{body, href, alt}, text))
         default: Option.none
         }
     }
@@ -73,32 +88,47 @@ module Markup {
 
     private function json add_wiki_links(json json) {
         match(destruct_link(json)) {
-        case { some:
-               { body: ({ List: body_list } as body),
-                 href: "",
-                 alt: ""
-               } }:
-            /* FIXME: when the wiki link contains two or more consecutive spaces, we have no way to know */
-            link = List.map(
-                function(x){
-                    match(x) {
-                    case {Record: [("Str", {String: str})]}: str
-                    case {String: "Space"}: " "
-                    default: "" /* FIXME: log error */
-                    }
-                },
-                body_list
-            ) |> String.concat("", _)
-            construct_link({~body, href:("/" + link), alt:""})
+        case { some: ({ ~body, href: "", alt: "" }, link_text) }:
+            construct_link({~body, href:("/" + link_text), alt:""})
         default:
             apply_to_children(add_wiki_links, json)
         }
     }
 
+    private function json subst_pages(json json) {
+        match(destruct_link(json)) {
+        case { some: ({ body:_, href: "!subst", alt: "" }, "") }:
+            /* TODO: log error */
+            error("what page to substitute with?")
+        case { some: ({ ~body, href: "!subst", alt: "" }, link_text) }:
+            rev_page_path = link_text |> String.explode("/", _) |> List.rev
+            title = List.head(rev_page_path)
+            path = List.tail(rev_page_path) |> List.rev
+            match(Model.read_page(Config.config, path, title)) {
+            case {none}:
+                construct_link({~body, href:("/" + link_text), alt:"!subst"})
+            case {some: page}:
+                html = page.content |> render |> Xhtml.to_string
+                { Record: [("RawInline",
+                            {List: [
+                                {String: "html"},
+                                {String: html}
+                            ]}
+                           )]}
+            }
+        default:
+            apply_to_children(subst_pages, json)
+        }
+    }
+
+    private function json json_passes(json) {
+        json |> add_wiki_links |> subst_pages
+    }
+
     function xhtml render(string markdown) {
         markdown
         |> markdown_to_json
-        |> add_wiki_links
+        |> json_passes
         |> json_to_html
     }
 
