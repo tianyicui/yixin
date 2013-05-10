@@ -16,8 +16,12 @@ module View {
   }
 
   function display(config, path, title) {
-      page = Model.read_page(config, path, title)
-      page_template(title, Markup.render(page.content))
+      match(Model.read_page(config, path, title)) {
+      case {none}:
+          Resource.error_page(title, <>Page Not Found</>, {wrong_address})
+      case {some: page}:
+          page_template(title, Markup.render(page.content))
+      }
   }
 
 }

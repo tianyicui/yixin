@@ -24,11 +24,14 @@ module Model {
         |> String.concat("/", _)
     }
 
-    function read_page(config, path, title) {
-        filepath = page_file_path(config, path, title)
-        content = File.read(filepath) |> string_of_binary
-        metadata = config.default_metadata
-        ~{ path, title, metadata, content }
+    function option(page) read_page(config, path, title) {
+        match(page_file_path(config, path, title) |> File.read_opt) {
+            case {none}: {none}
+            case {~some}:
+                content = string_of_binary(some)
+                metadata = config.default_metadata
+                Option.some(~{ path, title, metadata, content })
+        }
     }
 
     function write_page(config, path, title, commit_msg) {
