@@ -25,13 +25,15 @@ module Model {
     }
 
     function option(page) read_page(config, path, title) {
-        match(page_file_path(config, path, title) |> File.read_opt) {
-            case {none}: {none}
-            case {~some}:
-                content = string_of_binary(some)
-                metadata = config.default_metadata
-                Option.some(~{ path, title, metadata, content })
-        }
+        page_file_path(config, path, title)
+        |> File.read_opt
+        |> Option.map(function(file) {
+            { ~path
+            , ~title
+            , metadata: config.default_metadata
+            , content: string_of_binary(file)
+            }
+        }, _)
     }
 
     function write_page(config, path, title, commit_msg) {
