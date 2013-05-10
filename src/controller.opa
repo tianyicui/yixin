@@ -4,6 +4,8 @@ module Controller {
 
   function dispatch(url) {
       match(url) {
+          case {path:["favicon.ico"] ...} :
+              @static_resource("resources/favicon.ico")
           case {path:[] ...} :
               View.display(config, [], config.front_page)
           case {~path ...} :
@@ -22,7 +24,7 @@ Server.start(Server.http, [
     { register:
       [ { doctype: { html5 } },
         { js: [ ] },
-        { css: [ "/resources/css/style.css"] }
+        { css: [ "/resources/style.css"] }
       ]
     },
     { ~resources },
