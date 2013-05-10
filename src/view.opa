@@ -5,7 +5,7 @@ module View {
           <div class="navbar navbar-fixed-top">
             <div class=navbar-inner>
               <div class=container>
-                <a class=brand href="./index.html">yixin</>
+                <a class=brand href="/">Yixin</>
               </div>
             </div>
           </div>
