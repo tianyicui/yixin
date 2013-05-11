@@ -1,7 +1,3 @@
-/* FIXME: these two imports are temporary hack */
-import yixin.model
-import yixin.config
-
 private type json = RPC.Json.json0(json)
 private type link = {json body, string href, string alt}
 
@@ -94,34 +90,29 @@ module Markup {
         }
     }
 
-    private function json subst_pages(json json) {
+    private function json include_pages(json json) {
         match(destruct_link(json)) {
         case { some: ({ body:_, href: "!subst", alt: "" }, "") }:
             /* TODO: log error */
-            error("what page to substitute with?")
-        case { some: ({ ~body, href: "!subst", alt: "" }, link_text) }:
-            rev_page_path = link_text |> String.explode("/", _) |> List.rev
-            title = List.head(rev_page_path)
-            path = List.tail(rev_page_path) |> List.rev
-            match(Model.read_page(Config.config, path, title)) {
-            case {none}:
-                construct_link({~body, href:("/" + link_text), alt:"!subst"})
-            case {some: page}:
-                html = page.content |> render |> Xhtml.to_string
-                { Record: [("RawInline",
-                            {List: [
-                                {String: "html"},
-                                {String: html}
-                            ]}
-                           )]}
-            }
+            error("what page to include?")
+        case { some: ({ body:_, href: "!subst", alt: "" }, link_text) }:
+            html =
+              <div class=yixin-include-page yixin-include-page="{link_text}">
+                <p class=text-info>Loading {link_text}...</p>
+              </div>
+            { Record: [("RawInline",
+                        {List: [
+                            {String: "html"},
+                            {String: html |> Xhtml.to_string}
+                        ]}
+                       )]}
         default:
-            apply_to_children(subst_pages, json)
+            apply_to_children(include_pages, json)
         }
     }
 
     private function json json_passes(json json) {
-        json |> add_wiki_links |> subst_pages
+        json |> add_wiki_links |> include_pages
     }
 
     function xhtml render(string markdown) {
