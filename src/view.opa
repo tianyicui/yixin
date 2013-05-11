@@ -10,7 +10,9 @@ module View {
             </div>
           </div>
           <div id=#main class=container-fluid>
-            {content}
+            <div class=container>
+              {content}
+            </div>
           </div>
         Resource.page(title, html)
     }
@@ -21,7 +23,8 @@ module View {
             html = <>Page Not Found</>
             Resource.error_page(title, html, {wrong_address})
         case {some: page}:
-            page_template(title, Markup.render(page.content))
+            content = <h1>{title}</h1> <+> Markup.render(page.content)
+            page_template(title, content)
         }
     }
 

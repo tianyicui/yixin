@@ -12,6 +12,7 @@ module Markup {
         , "-f", "markdown"
         , "-t", "json"
         , "--smart"
+        , "--base-header-level=2"
         ]
         |> String.concat(" ", _)
         |> System.exec(_, markdown)
@@ -69,9 +70,7 @@ module Markup {
         }
     }
 
-    private function json apply_to_children(
-        /* TODO: how to specify its type? */ f, json json
-    ) {
+    private function json apply_to_children((json -> json) f, json json) {
         match(json) {
         case { List: children }:
             { List: List.map(f, children) }
@@ -121,7 +120,7 @@ module Markup {
         }
     }
 
-    private function json json_passes(json) {
+    private function json json_passes(json json) {
         json |> add_wiki_links |> subst_pages
     }
 
