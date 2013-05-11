@@ -19,9 +19,9 @@ CONF_FILE = opa.conf
 #Compiler variables
 OPACOMPILER ?= opa
 FLAG = --opx-dir _build
-PORT = 8080
+PORT = 5005
 
-RUN_OPT =
+RUN_OPT = -p $(PORT)
 
 default: exe
 
