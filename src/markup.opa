@@ -97,9 +97,10 @@ module Markup {
             error("what page to include?")
         case { some: ({ body:_, href: "!subst", alt: "" }, link_text) }:
             html =
-              <div class=yixin-include-page yixin-include-page="{link_text}">
+              <div class={[INCLUDE_PAGE]}>
                 <p class=text-info>Loading {link_text}...</p>
               </div>
+              |> Xhtml.add_attribute_unsafe(INCLUDE_PAGE, link_text, _)
             { Record: [("RawInline",
                         {List: [
                             {String: "html"},
@@ -111,6 +112,7 @@ module Markup {
         }
     }
 
+    /* TODO: abstract JSON tree transformation and do two transforms in one single pass */
     private function json json_passes(json json) {
         json |> add_wiki_links |> include_pages
     }

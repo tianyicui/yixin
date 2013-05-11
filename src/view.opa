@@ -31,14 +31,14 @@ module View {
         }
     }
 
-    private function void include_page() {
-        Dom.select_class("yixin-include-page") |> Dom.iter(
+    private client function void include_page() {
+        Dom.select_class(INCLUDE_PAGE) |> Dom.iter(
             function (dom dom) {
+                Dom.remove_class(dom, INCLUDE_PAGE)
                 page_path =
-                    Dom.get_attribute(dom, "yixin-include-page") |> Option.get
+                    Dom.get_attribute(dom, INCLUDE_PAGE) |> Option.get
                 page = get_wiki_page(page_path)
                 Dom.set_html_unsafe(dom, Xhtml.to_string(page))
-                Dom.remove_class(dom, "yixin-include-page")
             },
             _
         )
