@@ -7,12 +7,12 @@ module Controller {
         case {path:["favicon.ico"] ...} :
             @static_resource("resources/favicon.ico")
         case {path:[] ...} :
-            View.display(config, [], config.front_page)
+            View.display([], config.front_page)
         case {~path ...} :
             rev_path = List.rev(path)
             title = List.head(rev_path)
             path = List.rev(List.tail(rev_path))
-            View.display(config, path, title)
+            View.display(path, title)
         }
     }
 

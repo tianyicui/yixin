@@ -1,31 +1,14 @@
-type repo = { string path }
-
-type config =
-    { string title
-    , repo repo
-    , string front_page
-    , string page_extension
-    , metadata default_metadata
-    }
-
-type page =
-    { list(string) path
-    , string title
-    , metadata metadata
-    , string content
-    }
-
-type metadata = void
-
 module Model {
 
-    private function page_file_path(config, path, title) {
+    private config = Config.config
+
+    private function page_file_path(path, title) {
         [config.repo.path] ++ path ++ [title + config.page_extension]
         |> String.concat("/", _)
     }
 
-    function option(page) read_page(config, path, title) {
-        page_file_path(config, path, title)
+    function option(page) read_page(path, title) {
+        page_file_path(path, title)
         |> File.read_opt
         |> Option.map(function(file) {
             { ~path
@@ -36,7 +19,7 @@ module Model {
         }, _)
     }
 
-    function write_page(config, path, title, commit_msg) {
+    function write_page(_path, _title, _commit_msg) {
         error("not implemented")
     }
 

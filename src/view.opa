@@ -15,11 +15,11 @@ module View {
         Resource.page(title, html)
     }
 
-    private function xhtml get_wiki_page(config, page_path) {
+    private exposed function xhtml get_wiki_page(page_path) {
         rev_page_path = page_path |> String.explode("/", _) |> List.rev
         title = List.head(rev_page_path)
         path = List.tail(rev_page_path) |> List.rev
-        match(Model.read_page(config, path, title)) {
+        match(Model.read_page(path, title)) {
         case {none}:
             uri = Uri.of_string("/"+page_path) |> Option.get
             <p class=text-error>
@@ -27,16 +27,16 @@ module View {
             </p>
         case {some: page}:
             content = Markup.render(page.content)
-            Xhtml.add_onready(function(_){include_page(config)}, content)
+            Xhtml.add_onready(function(_){include_page()}, content)
         }
     }
 
-    private function void include_page(config) {
+    private function void include_page() {
         Dom.select_class("yixin-include-page") |> Dom.iter(
             function (dom dom) {
                 page_path =
                     Dom.get_attribute(dom, "yixin-include-page") |> Option.get
-                page = get_wiki_page(config, page_path)
+                page = get_wiki_page(page_path)
                 Dom.set_html_unsafe(dom, Xhtml.to_string(page))
                 Dom.remove_class(dom, "yixin-include-page")
             },
@@ -44,8 +44,8 @@ module View {
         )
     }
 
-    function display(config, path, title) {
-        match(Model.read_page(config, path, title)) {
+    function display(path, title) {
+        match(Model.read_page(path, title)) {
         case {none}:
             html = <>Page Not Found</>
             Resource.error_page(title, html, {wrong_address})
@@ -55,7 +55,7 @@ module View {
                 <h1>{title}</h1>
                 {Markup.render(page.content)}
               </div>
-            content = Xhtml.add_onready(function(_){include_page(config)}, content)
+            content = Xhtml.add_onready(function(_){include_page()}, content)
             page_template(title, content)
         }
     }
