@@ -25,10 +25,16 @@ module Model {
         | arguments
         ]
         |> Helper.exec("git", _, "")
-        |> Log.error("git output", _)
+        |> ignore /* FIXME: shouldn't ignore, but how to detect error? */
     }
 
     function void write_page(page page, string commit_msg) {
+        commit_msg = if(String.is_empty(commit_msg)) {
+            "update {page.title} via Yixin"
+        }
+        else {
+            commit_msg
+        }
         path = page_file_path(page.path, page.title)
         File.write(path, binary_of_string(page.content))
         exec_git(["commit", "-m", commit_msg, "--", path])

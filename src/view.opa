@@ -14,7 +14,58 @@ module View {
           <div id=#main class=container-fluid>
             {content}
           </div>
-          Resource.page("{title} - {config.title}", html)
+        Resource.page("{title} - {config.title}", html)
+    }
+
+    private exposed function xhtml html_of_page(page page){
+        container_id = Dom.fresh_id()
+        content_id = Dom.fresh_id()
+        editor_id = Dom.fresh_id()
+        textarea_id = Dom.fresh_id()
+        commit_msg_id = Dom.fresh_id()
+
+        function void edit_page(_) {
+            Dom.set_value(#{textarea_id}, page.content)
+            Dom.get_width(#{content_id})
+                |> Dom.set_width(#{editor_id}, _)
+            min(Dom.get_height(#{content_id}), 1200)
+                |> Dom.set_height(#{textarea_id}, _)
+            Dom.hide(#{content_id})
+            Dom.show(#{editor_id})
+            Dom.give_focus(#{textarea_id})
+        }
+
+        function void save_page(_) {
+            content = Dom.get_value(#{textarea_id})
+            if(String.equals(content, page.content)) {
+                Dom.hide(#{editor_id})
+                Dom.show(#{content_id})
+            } else {
+                page = { page with ~content }
+                commit_msg = Dom.get_value(#{commit_msg_id})
+                Model.write_page(page, commit_msg)
+                /* FIXME: temporary hack because I don't know how to
+                          replace DOM elements...
+                 */
+                Client.do_reload(true)
+            }
+        }
+
+        /* TODO: use widgets in stdlib for hintint and other improvement */
+        Xhtml.add_onready(
+            function(_){include_pages(content_id)},
+            <div id={container_id}>
+              <div id={content_id}
+                   ondblclick={edit_page}
+                   options:ondblclick="stop_propagation" >
+                {Markup.render(page.content)}
+              </>
+              <form id={editor_id} onsubmit={save_page} hidden>
+                <textarea id={textarea_id} width="100%" />
+                <input type=text id={commit_msg_id} style="width:100%" />
+              </>
+            </div>
+        )
     }
 
     private exposed function xhtml get_wiki_page(page_path) {
@@ -28,10 +79,7 @@ module View {
                Page <a href={uri}>{page_path}</a> isn't created yet
             </p>
         case {some: page}:
-            id = Dom.fresh_id()
-            content =
-              <div id={id}>{Markup.render(page.content)}</>
-            Xhtml.add_onready(function(_){include_pages(id)}, content)
+            html_of_page(page)
         }
     }
 
@@ -59,11 +107,8 @@ module View {
             content =
               <div id=#wiki-page class=container>
                 <h1>{title}</h1>
-                {Markup.render(page.content)}
+                {html_of_page(page)}
               </div>
-              content = Xhtml.add_onready(
-                  function(_){include_pages("wiki-page")},
-                  content)
             page_template(title, content)
         }
     }
