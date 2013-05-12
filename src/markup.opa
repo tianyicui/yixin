@@ -67,55 +67,66 @@ module Markup {
         }
     }
 
-    private function json apply_to_children((json -> json) f, json json) {
-        match(json) {
-        case { List: children }:
-            { List: List.map(f, children) }
-        case { Record: children }:
-            { Record: List.map(
-                function((name, json)) {
-                    (name, f(json))
-                },
-                children
-            )}
-        default: json
-        }
-    }
-
-    private function json add_wiki_links(json json) {
+    private function option(json) add_wiki_links(json json) {
         match(destruct_link(json)) {
-        case { some: ({ ~body, href: "", alt: "" }, link_text) }:
-            construct_link({~body, href:("/" + link_text), alt:""})
+        case { some: ({ ~body, href: "", ~alt }, link_text) }:
+            href = "/" + link_text
+            {some: construct_link(~{body, href, alt})}
         default:
-            apply_to_children(add_wiki_links, json)
+            {none}
         }
     }
 
-    private function json include_pages(json json) {
+    private function option(json) include_pages(json json) {
         match(destruct_link(json)) {
         case { some: ({ body:_, href: "!subst", alt: "" }, "") }:
-            /* TODO: log error */
-            error("what page to include?")
+            {none}
         case { some: ({ body:_, href: "!subst", alt: "" }, link_text) }:
             html =
               <div class={[INCLUDE_PAGE]}>
                 <p class=text-info>Loading {link_text}...</p>
               </div>
               |> Xhtml.add_attribute_unsafe(INCLUDE_PAGE, link_text, _)
-            { Record: [("RawInline",
-                        {List: [
-                            {String: "html"},
-                            {String: html |> Xhtml.to_string}
-                        ]}
-                       )]}
+            {some: {Record:
+                    [("RawInline",
+                      {List: [
+                          {String: "html"},
+                          {String: html |> Xhtml.to_string}
+                      ]}
+                     )]}
+            }
         default:
-            apply_to_children(include_pages, json)
+            {none}
         }
     }
 
-    /* TODO: abstract JSON tree transformation and do two transforms in one single pass */
     private function json json_passes(json json) {
-        json |> add_wiki_links |> include_pages
+        recursive function json apply_to_children(f, json) {
+            match(json) {
+            case { List: children }:
+                { List: List.map(f, children) }
+            case { Record: children }:
+                { Record: List.map(
+                    function((name, json)) {
+                        (name, f(json))
+                    },
+                    children
+                )}
+            default: json
+            }
+        }
+        all_passes = [add_wiki_links, include_pages]
+        recursive function json do_json_passes(json, passes) {
+            match(passes) {
+            case []: apply_to_children(do_json_passes(_, all_passes), json)
+            case [f | fs]:
+                match(f(json)) {
+                case {none}: do_json_passes(json, fs)
+                case {some: json}: do_json_passes(json, all_passes)
+                }
+            }
+        }
+        do_json_passes(json, all_passes)
     }
 
     function xhtml render(string markdown) {
