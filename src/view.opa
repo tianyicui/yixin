@@ -17,14 +17,14 @@ module View {
         Resource.page("{title} - {config.title}", html)
     }
 
-    private exposed function xhtml html_of_page(page page){
+    private function xhtml html_of_page(page page){
         container_id = Dom.fresh_id()
         content_id = Dom.fresh_id()
         editor_id = Dom.fresh_id()
         textarea_id = Dom.fresh_id()
         commit_msg_id = Dom.fresh_id()
 
-        function void edit_page(_) {
+        client function void edit_page(_) {
             Dom.set_value(#{textarea_id}, page.content)
             Dom.get_width(#{content_id})
                 |> Dom.set_width(#{editor_id}, _)
@@ -35,7 +35,7 @@ module View {
             Dom.give_focus(#{textarea_id})
         }
 
-        function void save_page(_) {
+        client function void save_page(_) {
             content = Dom.get_value(#{textarea_id})
             if(String.equals(content, page.content)) {
                 Dom.hide(#{editor_id})

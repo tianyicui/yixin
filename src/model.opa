@@ -28,7 +28,7 @@ module Model {
         |> ignore /* FIXME: shouldn't ignore, but how to detect error? */
     }
 
-    function void write_page(page page, string commit_msg) {
+    exposed function void write_page(page page, string commit_msg) {
         commit_msg = if(String.is_empty(commit_msg)) {
             "update {page.title} via Yixin"
         }
