@@ -12,4 +12,5 @@ opa-debug-js
 *.exe
 *.log
 
+*.bak~
 package.json
