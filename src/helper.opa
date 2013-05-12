@@ -7,8 +7,8 @@ module Helper {
         |> function(s) { "'{s}'" }
     }
 
-    function string exec(list(string) command_line, string stdin) {
-        command_line
+    function string exec(string executable, list(string) arguments, string stdin) {
+        [ executable | arguments ]
         |> List.map(escape_for_shell, _)
         |> String.concat(" ", _)
         |> System.exec(_, stdin)

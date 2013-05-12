@@ -3,9 +3,7 @@ private type link = {json body, string href, string alt}
 
 module Markup {
 
-    private function string exec_pandoc(list(string) arguments, string input) {
-        Helper.exec(["pandoc" | arguments], input)
-    }
+    private exec_pandoc = Helper.exec("pandoc", _, _)
 
     private function json markdown_to_json(string markdown) {
         [ "-f", "markdown+autolink_bare_uris"

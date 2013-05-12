@@ -20,13 +20,12 @@ module Model {
     }
 
     private function void exec_git(list(string) arguments) {
-        [ "GIT_DIR={config.repo.path}/.git"
-        , "GIT_WORK_TREE={config.repo.path}"
-        , "git"
+        [ "--git-dir={config.repo.path}/.git"
+        , "--work-tree={config.repo.path}"
         | arguments
         ]
-        |> Helper.exec(_, "")
-        |> ignore
+        |> Helper.exec("git", _, "")
+        |> Log.error("git output", _)
     }
 
     function void write_page(page page, string commit_msg) {
