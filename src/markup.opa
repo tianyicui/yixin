@@ -3,28 +3,28 @@ private type link = {json body, string href, string alt}
 
 module Markup {
 
+    private function string exec_pandoc(list(string) arguments, string input) {
+        Helper.exec(["pandoc" | arguments], input)
+    }
+
     private function json markdown_to_json(string markdown) {
-        [ "pandoc"
-        , "-f", "markdown+autolink_bare_uris"
+        [ "-f", "markdown+autolink_bare_uris"
         , "-t", "json"
         , "--smart"
         , "--base-header-level=2"
         ]
-        |> String.concat(" ", _)
-        |> System.exec(_, markdown)
+        |> exec_pandoc(_, markdown)
         |> Json.deserialize
         |> Option.get
     }
 
     private function xhtml json_to_html(json json) {
-        [ "pandoc"
-        , "-f", "json"
+        [ "-f", "json"
         , "-t", "html5"
         , "--mathml"
         , "--no-wrap"
         ]
-        |> String.concat(" ", _)
-        |> System.exec(_, Json.serialize(json))
+        |> exec_pandoc( _, Json.serialize(json))
         |> Xhtml.of_string_unsafe
     }
 

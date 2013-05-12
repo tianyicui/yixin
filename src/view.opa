@@ -31,11 +31,11 @@ module View {
             id = Dom.fresh_id()
             content =
               <div id={id}>{Markup.render(page.content)}</>
-            Xhtml.add_onready(function(_){include_page(id)}, content)
+            Xhtml.add_onready(function(_){include_pages(id)}, content)
         }
     }
 
-    private client function void include_page(string id) {
+    private client function void include_pages(string id) {
         Dom.select_class(INCLUDE_PAGE) |>
         Dom.select_inside(#{id}, _) |> Dom.iter(
             function (dom dom) {
@@ -62,7 +62,7 @@ module View {
                 {Markup.render(page.content)}
               </div>
               content = Xhtml.add_onready(
-                  function(_){include_page("wiki-page")},
+                  function(_){include_pages("wiki-page")},
                   content)
             page_template(title, content)
         }
