@@ -1,18 +1,20 @@
 module View {
 
+    private config = Config.config
+
     private function page_template(title, content) {
         html =
           <div class="navbar navbar-fixed-top">
             <div class=navbar-inner>
               <div class=container>
-                <a class=brand href="/">Yixin</>
+                <a class=brand href="/" alt="Powered by Yixin">{config.title}</>
               </div>
             </div>
           </div>
           <div id=#main class=container-fluid>
             {content}
           </div>
-        Resource.page(title, html)
+          Resource.page("{title} - {config.title}", html)
     }
 
     private exposed function xhtml get_wiki_page(page_path) {
@@ -37,7 +39,9 @@ module View {
                 Dom.remove_class(dom, INCLUDE_PAGE)
                 page_path =
                     Dom.get_attribute(dom, INCLUDE_PAGE) |> Option.get
+                /* FIXME: Is this call async? */
                 page = get_wiki_page(page_path)
+                /* FIXME: There might be a better way than set_html_unsafe */
                 Dom.set_html_unsafe(dom, Xhtml.to_string(page))
             },
             _

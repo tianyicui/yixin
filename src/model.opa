@@ -7,6 +7,7 @@ module Model {
         |> String.concat("/", _)
     }
 
+    /* FIXME: should not be able to read untracked file */
     function option(page) read_page(path, title) {
         page_file_path(path, title)
         |> File.read_opt

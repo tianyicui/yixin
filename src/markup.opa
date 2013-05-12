@@ -5,7 +5,7 @@ module Markup {
 
     private function json markdown_to_json(string markdown) {
         [ "pandoc"
-        , "-f", "markdown"
+        , "-f", "markdown+autolink_bare_uris"
         , "-t", "json"
         , "--smart"
         , "--base-header-level=2"
@@ -21,6 +21,7 @@ module Markup {
         , "-f", "json"
         , "-t", "html5"
         , "--mathml"
+        , "--no-wrap"
         ]
         |> String.concat(" ", _)
         |> System.exec(_, Json.serialize(json))
